@@ -28,6 +28,10 @@ app.use(cors({
 }))
 
 app.use(morgan('dev'))
+app.use(helmet())
+
+
+app.use('/api/v1',userRoute)
 
 
 const start = async () => {

@@ -2,7 +2,7 @@ const { StatusCodes } = require('http-status-codes')
 const User = require('../models/user')
 const { response } = require('../responses/response')
 const crypto = require('crypto')
-const { sendVerificationEmail } = require('../utils/verifyEmail')
+const { sendVerificationEmail, deviceChangedEmail } = require('../utils/verifyEmail')
 const tokenModel = require('../models/token')
 const { createUser, attachCookiesToResponse } = require('../utils/jwt utils')
 
@@ -160,13 +160,13 @@ const login = async (req, res) => {
 
         attachCookiesToResponse({ res, user: userToken, refreshToken })
 
-        if(req.headers['user-agent'] !== checkToken.userAgent){
-            
+        if (req.headers['user-agent'] !== checkToken.userAgent) {
+
             checkToken.userAgent = req.headers['user-agent'];
 
             await checkToken.save()
 
-            //sendEmail()
+            deviceChangedEmail({ name: req.user.name, email: user.email })
         }
 
         res.status(StatusCodes.CREATED).json(response({
@@ -183,14 +183,6 @@ const login = async (req, res) => {
     let userAgent = req.headers['user-agent'];
 
 
-    if(userAgent != checkToken.userAgent ){
-
-        //sendChangeEmail()
-
-        checkToken.userAgent = userAgent
-
-        checkToken.save()
-    }
 
     const newUsers = {
         ip,
@@ -206,10 +198,24 @@ const login = async (req, res) => {
 }
 
 
-
-
-
 const logout = async (req, res) => {
+
+    await tokenModel.findOneAndDelete({ user: req.user.userId })
+
+    res.cookie('accessToken', 'logout', {
+        httpOnly: true,
+        expires: new Date(Date.now())
+    })
+
+    res.cookie('refreshToken', 'logout', {
+        httpOnly: true,
+        expires: new Date(Date.now())
+    })
+
+    res.status(StatusCodes.CREATED).json(response({
+        data: 'logged out',
+        status: StatusCodes.OK
+    }))
 
 }
 
@@ -219,6 +225,8 @@ const logout = async (req, res) => {
 
 module.exports = {
     Register,
+    verifyEmail,
     login,
     logout
+
 }
