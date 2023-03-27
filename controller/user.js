@@ -160,6 +160,8 @@ const login = async (req, res) => {
 
         attachCookiesToResponse({ res, user: userToken, refreshToken })
 
+
+
         if (req.headers['user-agent'] !== checkToken.userAgent) {
 
             checkToken.userAgent = req.headers['user-agent'];
@@ -167,7 +169,24 @@ const login = async (req, res) => {
             await checkToken.save()
 
             deviceChangedEmail({ name: req.user.name, email: user.email })
+
+            await tokenModel.findOneAndDelete({ user: user._id })
+
+            refreshToken = crypto.randomBytes(20).toString('hex')
+
+            attachCookiesToResponse({ res, user: userToken, refreshToken })
+
+
+
+        } else if (req.cookies.refreshToken !== checkToken.refreshToken) {
+
+            await tokenModel.findOneAndDelete({ user: user._id })
+
+            refreshToken = crypto.randomBytes(20).toString('hex')
+
+            attachCookiesToResponse({ res, user: userToken, refreshToken })
         }
+
 
         res.status(StatusCodes.CREATED).json(response({
             data: 'You have been verified',
