@@ -4,6 +4,7 @@ const { response } = require('../responses/response')
 const crypto = require('crypto')
 const { sendVerificationEmail } = require('../utils/verifyEmail')
 const tokenModel = require('../models/token')
+const { createUser, attachCookiesToResponse } = require('../utils/jwt utils')
 
 
 const Register = async (req, res) => {
@@ -134,7 +135,73 @@ const login = async (req, res) => {
         }))
     }
 
+    const userToken = createUser(user)
 
+
+    const checkToken = await tokenModel.findOne({ user: user._id })
+
+    let refreshToken = ''
+
+    refreshToken = crypto.randomBytes(20).toString('hex')
+
+    if (checkToken) {
+
+        const { isValid } = checkToken
+
+        if (!isValid) {
+            res.status(StatusCodes.CREATED).json(response({
+                data: 'You are not allowed to continue to the next due to failed account',
+                status: StatusCodes.BAD_REQUEST
+            }))
+
+        }
+
+        refreshToken = checkToken.refreshToken
+
+        attachCookiesToResponse({ res, user: userToken, refreshToken })
+
+        if(req.headers['user-agent'] !== checkToken.userAgent){
+            
+            checkToken.userAgent = req.headers['user-agent'];
+
+            await checkToken.save()
+
+            //sendEmail()
+        }
+
+        res.status(StatusCodes.CREATED).json(response({
+            data: 'You have been verified',
+            status: StatusCodes.OK
+        }))
+
+        return;
+
+    }
+
+
+    let ip = req.ip
+    let userAgent = req.headers['user-agent'];
+
+
+    if(userAgent != checkToken.userAgent ){
+
+        //sendChangeEmail()
+
+        checkToken.userAgent = userAgent
+
+        checkToken.save()
+    }
+
+    const newUsers = {
+        ip,
+        userAgent,
+        refreshToken,
+        user: user._id
+    }
+
+    attachCookiesToResponse({ res, user: userToken, refreshToken })
+
+    await tokenModel.create(newUsers)
 
 }
 
@@ -144,4 +211,14 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
 
+}
+
+
+
+
+
+module.exports = {
+    Register,
+    login,
+    logout
 }

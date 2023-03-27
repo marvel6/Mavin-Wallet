@@ -6,12 +6,28 @@ const app = express()
 
 const port = process.env.PORT || 8080
 
+const cookie = require('cookie-parser')
+const helmet = require('helmet')
+const cors = require('cors')
+const morgan = require('morgan')
+
 
 
 const connecdb = require('./db/connect')
+const userRoute = require('./routers/userRoute')
 
 
 
+app.use(cookie(process.env.JWT_SECRET))
+
+
+app.use(cors({
+    credentials: true,
+    origin: true,
+    methods: ['GET', 'POST', 'DELETE', 'PATCH']
+}))
+
+app.use(morgan('dev'))
 
 
 const start = async () => {
