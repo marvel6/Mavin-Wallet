@@ -2,6 +2,7 @@ const { response } = require('../responses/response')
 const User = require('../models/user')
 const { StatusCodes } = require('http-status-codes')
 const { createUser, attachCookiesToResponse } = require('../utils/Jutils')
+const {checkPermission} = require('../utils/Jutils')
 
 
 const getallWalletUsers = async (req, res) => {
@@ -27,6 +28,8 @@ const getSingleUserWallet = async (req, res) => {
                 status: StatusCodes.BAD_REQUEST
             }))
         }
+
+        checkPermission(req.user,users._id)
 
         res.status(StatusCodes.OK).json(response({
             data: users,
