@@ -12,4 +12,4 @@ const checkPermission = (reqUser, reqUserId) => {
 }
 
 
-module.exports = {checkPermission}
+module.exports = { checkPermission }
