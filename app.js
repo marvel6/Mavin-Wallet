@@ -15,6 +15,7 @@ const morgan = require('morgan')
 
 const connecdb = require('./db/connect')
 const userRoute = require('./routers/userRoute')
+const userSettingRoute = require('./routers/user-setting')
 
 
 app.use(express.json())
@@ -35,6 +36,7 @@ app.use(helmet())
 
 
 app.use('/api/v1',userRoute)
+app.use('/api/v1',userSettingRoute)
 
 
 const start = async () => {
