@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const validator = require('validator')
 
 
-const userSchema = mongoose.Schema({
+const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: [true, 'please provide username'],
@@ -25,12 +25,13 @@ const userSchema = mongoose.Schema({
     },
     phoneNumber: {
         type: String,
-        required: [true, 'please provide phone number']
+        required: [true, 'please provide phone number'],
+        unique: true,
     },
     role: {
         type: String,
-        enum: ["admin", "user"],
-        default: true
+        enum: ['admin', 'user'],
+        default: 'user'
     },
     balance: {
         type: Number,
@@ -47,8 +48,7 @@ const userSchema = mongoose.Schema({
 
 
 userSchema.pre('save', async function () {
-
-    if (!this.isModified('password')) return
+    if (!this.isModified('password')) return;
 
     const salt = await bcrypt.genSalt(10)
     this.password = await bcrypt.hash(this.password, salt)
@@ -56,11 +56,10 @@ userSchema.pre('save', async function () {
 
 
 userSchema.methods.validatePassword = async function (password) {
-
     const isMatch = await bcrypt.compare(password, this.password)
-
     return isMatch
 }
+
 
 
 module.exports = mongoose.model('user', userSchema)

@@ -17,6 +17,9 @@ const connecdb = require('./db/connect')
 const userRoute = require('./routers/userRoute')
 
 
+app.use(express.json())
+app.use(express.urlencoded({extended:true}))
+
 
 app.use(cookie(process.env.JWT_SECRET))
 

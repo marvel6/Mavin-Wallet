@@ -1,6 +1,6 @@
 const tokenModel = require('../models/token')
 const response = require('../responses/response')
-const { verifyToken, attachCookiesToResponse } = require('../utils/jwt utils')
+const { verifyToken, attachCookiesToResponse } = require('../utils/Jutils')
 const { StatusCodes } = require('http-status-codes')
 
 
@@ -51,7 +51,7 @@ const authenticateUser = async (req, res, next) => {
         next()
 
     } catch (error) {
-        res.json(response({ data: error.message }))
+        res.json(response({ status: StatusCodes.INTERNAL_SERVER_ERROR, data: 'INTERNAL_SERVER_ERROR', }))
     }
 }
 
