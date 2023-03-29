@@ -4,4 +4,4 @@ const createUser = (user) => {
 }
 
 
-module.exports = {createUser}
+module.exports = createUser 

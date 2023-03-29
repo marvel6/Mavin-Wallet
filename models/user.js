@@ -26,7 +26,6 @@ const userSchema = new mongoose.Schema({
     phoneNumber: {
         type: String,
         required: [true, 'please provide phone number'],
-        unique: true,
     },
     role: {
         type: String,
@@ -55,9 +54,9 @@ userSchema.pre('save', async function () {
 })
 
 
-userSchema.methods.validatePassword = async function (password) {
-    const isMatch = await bcrypt.compare(password, this.password)
-    return isMatch
+userSchema.methods.comparePassword = async function (password) {
+    const valid = await bcrypt.compare(password, this.password)
+    return valid;
 }
 
 

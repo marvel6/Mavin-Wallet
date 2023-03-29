@@ -1,6 +1,6 @@
-const { createUser } = require('./createUser')
-const {attachCookiesToResponse,verifyToken} = require('../Jutils/jwt')
-const {checkPermission} = require('../Jutils/chekUserPermission')
+const  createUser = require('./createUser')
+const { attachCookiesToResponse, verifyToken } = require('../Jutils/jwt')
+const { checkPermission } = require('../Jutils/chekUserPermission')
 
 
 

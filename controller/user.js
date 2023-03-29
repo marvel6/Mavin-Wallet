@@ -31,6 +31,7 @@ const Register = async (req, res) => {
 
         }
 
+
         const isFirstAccount = (await User.countDocuments({}) === 0)
 
         const role = isFirstAccount ? "admin" : "user"
@@ -62,9 +63,11 @@ const Register = async (req, res) => {
 
 
     } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(response({
+
+        console.log(error)
+        res.status(StatusCodes.BAD_REQUEST).json(response({
             data: 'An error occurred while registering the user',
-            status: StatusCodes.INTERNAL_SERVER_ERROR
+            status: StatusCodes.BAD_REQUEST
         }))
 
     }
@@ -116,47 +119,39 @@ const verifyEmail = async (req, res) => {
         }))
 
     } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(response({
+        res.status(StatusCodes.BAD_REQUEST).json(response({
             data: 'An error occurred while verifying user Email',
-            status: StatusCodes.INTERNAL_SERVER_ERROR
+            status: StatusCodes.BAD_REQUEST
         }))
 
     }
 }
 
 
-
-
 const login = async (req, res) => {
 
     try {
-        const { phoneNumber, password } = req.body
 
-        if (!phoneNumber || !password) {
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: 'Please provide valid valid credentials',
-                status: StatusCodes.BAD_REQUEST
-            }))
+        const { email, password } = req.body
+
+        if (!email || !password) {
+
+            throw new Error('please provide valid email or password');
 
         }
 
-        const user = await User.findOne({ phoneNumber })
-
+        const user = await User.findOne({ email })
 
         if (!user) {
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: 'Phone number not found',
-                status: StatusCodes.BAD_REQUEST
-            }))
+            throw new Error('Invalid email or password');
         }
 
-        const confirmPassword = user.validatePassword(password)
 
-        if (!confirmPassword) {
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: 'Cannot confirm this password , please input correct password',
-                status: StatusCodes.BAD_REQUEST
-            }))
+        const comparePassword = await user.comparePassword(password)
+
+
+        if (!comparePassword) {
+            throw new Error('Invalid email or password');
         }
 
         const userToken = createUser(user)
@@ -173,18 +168,12 @@ const login = async (req, res) => {
             const { isValid } = checkToken
 
             if (!isValid) {
-                res.status(StatusCodes.BAD_REQUEST).json(response({
-                    data: 'You are not allowed to continue to the next due to failed account',
-                    status: StatusCodes.BAD_REQUEST
-                }))
-
+                throw new Error('Account has been locked');
             }
 
             refreshToken = checkToken.refreshToken
 
             attachCookiesToResponse({ res, user: userToken, refreshToken })
-
-
 
             if (req.headers['user-agent'] !== checkToken.userAgent) {
 
@@ -199,7 +188,6 @@ const login = async (req, res) => {
                 refreshToken = crypto.randomBytes(20).toString('hex')
 
                 attachCookiesToResponse({ res, user: userToken, refreshToken })
-
 
 
             } else if (req.cookies.refreshToken !== checkToken.refreshToken) {
@@ -236,15 +224,16 @@ const login = async (req, res) => {
 
         await tokenModel.create(newUsers)
 
-        res.status(StatusCodes.OK).json(response({
+        return res.status(StatusCodes.OK).json(response({
             data: `${user.username} has been logged in successfully`,
             status: StatusCodes.OK
         }))
 
     } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(response({
+
+        res.status(StatusCodes.BAD_REQUEST).json(response({
             data: `Something happened while logging user`,
-            status: StatusCodes.INTERNAL_SERVER_ERROR
+            status: StatusCodes.BAD_REQUEST
         }))
 
     }
@@ -277,9 +266,9 @@ const logout = async (req, res) => {
 
     } catch (error) {
 
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(response({
+        res.status(StatusCodes.BAD_REQUEST).json(response({
             data: ' something happened logging out',
-            status: StatusCodes.INTERNAL_SERVER_ERROR
+            status: StatusCodes.BAD_REQUEST
 
         }))
 

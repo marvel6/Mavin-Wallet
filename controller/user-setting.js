@@ -2,11 +2,11 @@ const { response } = require('../responses/response')
 const User = require('../models/user')
 const { StatusCodes } = require('http-status-codes')
 const { createUser, attachCookiesToResponse } = require('../utils/Jutils')
-const {checkPermission} = require('../utils/Jutils')
+const { checkPermission } = require('../utils/Jutils')
 
 
 const getallWalletUsers = async (req, res) => {
-    const users = await User.find({ role: 'user' }).select('-password')
+    const users = await User.find({ role: 'admin' }).select('-password -validationString ')
 
     res.status(StatusCodes.OK).json(response({
         data: users,
@@ -18,9 +18,9 @@ const getallWalletUsers = async (req, res) => {
 
 const getSingleUserWallet = async (req, res) => {
     try {
-        const { userId: _id } = req.params
+        const { id: userId } = req.params
 
-        const users = await User.findOne({ _id })
+        const users = await User.findOne({ userId }).select('-password -validationString ')
 
         if (!users) {
             res.status(StatusCodes.BAD_REQUEST).json(response({
@@ -29,7 +29,7 @@ const getSingleUserWallet = async (req, res) => {
             }))
         }
 
-        checkPermission(req.user,users._id)
+        checkPermission(req.user, users._id)
 
         res.status(StatusCodes.OK).json(response({
             data: users,
@@ -37,9 +37,11 @@ const getSingleUserWallet = async (req, res) => {
         }))
 
     } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(response({
+
+        console.log(error)
+        res.status(StatusCodes.BAD_REQUEST).json(response({
             data: `Something happend when getSingleUserWallet`,
-            status: StatusCodes.INTERNAL_SERVER_ERROR
+            status: StatusCodes.BAD_REQUEST
         }))
 
 
@@ -86,9 +88,9 @@ const updateUserWalletInfo = async (req, res) => {
         }))
 
     } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(response({
+        res.status(StatusCodes.BAD_REQUEST).json(response({
             data: `Something happend when updating user`,
-            status: StatusCodes.INTERNAL_SERVER_ERROR
+            status: StatusCodes.BAD_REQUEST
         }))
 
     }
@@ -97,48 +99,87 @@ const updateUserWalletInfo = async (req, res) => {
 
 const updateUserWalletPassword = async (req, res) => {
 
-    try {
+    try{
         const { oldPassword, newPassword } = req.body
 
-        if (!oldPassword || !newPassword) {
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: `Please provide valid credentials`,
-                status: StatusCodes.BAD_REQUEST
-            }))
-        }
+    if (!oldPassword || !newPassword) {
 
-        const user = await User.findOne({ _id: req.user.userId })
+        res.status(StatusCodes.BAD_REQUEST).json(response({
+            data: `Password mismatch`,
+            status: StatusCodes.BAD_REQUEST
+        }))
+    }
+
+
+    const user = await User.findOne({ user: req.user.userId })
+
+    if (!user) {
+
+        res.status(StatusCodes.BAD_REQUEST).json(response({
+            data: `There is no user with this account`,
+            status: StatusCodes.BAD_REQUEST
+        }))
+    }
+
+    const checkPasswordValid = await user.comparePassword(oldPassword)
+
+
+    if (!checkPasswordValid) {
+        
+        res.status(StatusCodes.BAD_REQUEST).json(response({
+            data: `Password Incorrect`,
+            status: StatusCodes.BAD_REQUEST
+        }))
+    }
+
+    user.password = newPassword
+
+    user.save();
+
+    res.status(StatusCodes.OK).json(response({
+        data: `Your password have been updated successfully`,
+        status: StatusCodes.OK
+    }))
+
+    }catch(error){
+        res.status(StatusCodes.BAD_REQUEST).json(response({
+            data: `Something happened while updating user info`,
+            status: StatusCodes.BAD_REQUEST
+        }))
+
+    }
+
+}
+
+
+const deleteWalletAccount = async (req, res) => {
+
+    try {
+        const { id: userId } = req.params
+
+        const user = await User.findOne({ userId })
 
         if (!user) {
             res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: `User not found`,
-                status: StatusCodes.BAD_REQUEST
-            }))
-
-        }
-
-        const checkOldPassword = user.validatePassword(oldPassword)
-
-        if (!checkOldPassword) {
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: `Old password verification failed`,
+                data: `There is no user with this account`,
                 status: StatusCodes.BAD_REQUEST
             }))
         }
 
-        user.password = newPassword
+        const removeAccount = await User.findOneAndDelete({ userId })
 
-        await user.save()
+        await removeAccount.remove();
 
         res.status(StatusCodes.OK).json(response({
-            data: `You have updated your password successfully`,
+            data: `Your account have been deleted`,
             status: StatusCodes.OK
         }))
 
     } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(response({
-            data: `INTERNAL SERVER ERROR OCCURED`,
-            status: StatusCodes.INTERNAL_SERVER_ERROR
+
+        res.status(StatusCodes.BAD_REQUEST).json(response({
+            data: `Something happened while deleting user account`,
+            status: StatusCodes.BAD_REQUEST
         }))
 
     }
@@ -146,12 +187,12 @@ const updateUserWalletPassword = async (req, res) => {
 
 }
 
-
 module.exports = {
     getallWalletUsers,
     getSingleUserWallet,
     updateUserWalletInfo,
     updateUserWalletPassword,
+    deleteWalletAccount
 }
 
 

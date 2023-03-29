@@ -1,57 +1,58 @@
-const tokenModel = require('../models/token')
-const response = require('../responses/response')
+const Token = require('../models/token')
+const { response } = require('../responses/response')
 const { verifyToken, attachCookiesToResponse } = require('../utils/Jutils')
 const { StatusCodes } = require('http-status-codes')
 
 
 
 const authenticateUser = async (req, res, next) => {
-    const { accessToken, refreshToken } = req.signedCookies
+
+    const { refreshToken, accessToken } = req.signedCookies;
 
     try {
 
         if (accessToken) {
-            const payload = verifyToken(accessToken)
+            const payload = verifyToken(accessToken);
 
             if (!payload) {
+
                 res.status(StatusCodes.UNAUTHORIZED).json(response({
-                    data: 'user payload credentials not found',
+                    data: 'You are not authorized to access this route',
                     status: StatusCodes.UNAUTHORIZED
                 }))
+
             }
-
-            req.user = payload.user
-
-
+            req.user = payload.user;
             return next();
         }
+        const payload = verifyToken(refreshToken);
 
-
-        const payload = verifyToken(refreshToken)
-
-        const token = await tokenModel.findOne({
+        const existingToken = await Token.findOne({
             user: payload.user.userId,
-            refreshToken: payload.refreshToken
-        })
+            refreshToken: payload.refreshToken,
+        });
 
-
-        if (!token && !token?.isValid) {
-
+        if (!existingToken || !existingToken?.isValid) {
             res.status(StatusCodes.UNAUTHORIZED).json(response({
-                data: 'user refreshtoken credentials not found',
+                data: 'You are not authorized to acess this route',
                 status: StatusCodes.UNAUTHORIZED
             }))
 
         }
 
-        attachCookiesToResponse({ res, user: payload.user, refreshToken: payload.refreshToken })
+        attachCookiesToResponse({
+            res,
+            user: payload.user,
+            refreshToken: existingToken.refreshToken,
+        });
 
-        req.user = payload.user
-
-        next()
-
+        req.user = payload.user;
+        next();
     } catch (error) {
-        res.json(response({ status: StatusCodes.INTERNAL_SERVER_ERROR, data: 'INTERNAL_SERVER_ERROR', }))
+        res.status(StatusCodes.BAD_REQUEST).json(response({
+            data: 'INTERNAL_SERVER_ERROR',
+            status: StatusCodes.BAD_REQUEST
+        }))
     }
 }
 
