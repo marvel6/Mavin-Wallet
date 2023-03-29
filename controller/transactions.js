@@ -104,7 +104,7 @@ const getUserSingleTransactions = async (req, res) => {
         throw new Error('No user with this number')
     }
 
-    const user = await Transact.find({ number })
+    const user = await Transact.find({ $or: [{ sender: number }, { receiver: number }] })
 
     const transaction = user.map(transact => {
 
