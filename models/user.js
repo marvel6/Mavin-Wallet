@@ -38,6 +38,11 @@ const userSchema = new mongoose.Schema({
     },
     validationString: String,
 
+    transactionPin: {
+        type: String,
+        required: true,
+    },
+
     isVerified: {
         type: Boolean,
         default: false
@@ -58,6 +63,24 @@ userSchema.methods.comparePassword = async function (password) {
     const valid = await bcrypt.compare(password, this.password)
     return valid;
 }
+
+
+userSchema.pre('save', async function () {
+    if (!this.isModified('transactionPin')) return;
+
+    const salt = await bcrypt.genSalt(10)
+    this.transactionPin = await bcrypt.hash(this.transactionPin, salt)
+})
+
+userSchema.methods.comparePin = async function (pin) {
+    const valid = await bcrypt.compare(pin, this.transactionPin)
+    return valid;
+}
+
+
+
+
+
 
 
 

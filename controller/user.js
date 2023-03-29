@@ -10,25 +10,18 @@ const { createUser, attachCookiesToResponse } = require('../utils/Jutils')
 const Register = async (req, res) => {
 
     try {
-        const { email, phoneNumber, password, username } = req.body
+        const { email, phoneNumber, password, username, transactionPin } = req.body
 
-        if (!email || !phoneNumber || !password || !username) {
+        if (!email || !phoneNumber || !password || !username || !transactionPin) {
 
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: 'Please provide valid valid credentials',
-                status: StatusCodes.BAD_REQUEST
-            }))
+            throw new Error('Please provide valid crendentials')
         }
 
 
         const user = await User.findOne({ email })
 
         if (user) {
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: 'User email already exists',
-                status: StatusCodes.BAD_REQUEST
-            }))
-
+            throw new Error('User email already exists')
         }
 
 
@@ -47,7 +40,8 @@ const Register = async (req, res) => {
             password,
             username,
             role,
-            validationString: verificationToken
+            validationString: verificationToken,
+            transactionPin
         }
 
 
@@ -119,6 +113,8 @@ const verifyEmail = async (req, res) => {
         }))
 
     } catch (error) {
+
+        console.log(error.message)
         res.status(StatusCodes.BAD_REQUEST).json(response({
             data: 'An error occurred while verifying user Email',
             status: StatusCodes.BAD_REQUEST
@@ -217,7 +213,7 @@ const login = async (req, res) => {
             ip,
             userAgent,
             refreshToken,
-            user: user._id
+            user: user._id,
         }
 
         attachCookiesToResponse({ res, user: userToken, refreshToken })

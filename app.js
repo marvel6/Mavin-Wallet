@@ -16,7 +16,7 @@ const morgan = require('morgan')
 const connecdb = require('./db/connect')
 const userRoute = require('./routers/userRoute')
 const userSettingRoute = require('./routers/user-setting')
-
+const makeTransactionRoute = require('./routers/transactions')
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
@@ -38,7 +38,7 @@ app.use(helmet())
 
 app.use('/api/v1',userRoute)
 app.use('/api/v1',userSettingRoute)
-
+app.use('/api/v1/user',makeTransactionRoute)
 
 const start = async () => {
     try {
