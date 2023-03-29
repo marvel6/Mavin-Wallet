@@ -26,7 +26,7 @@ const makeTransaction = async (req, res) => {
                 data: 'Insufficient balance account',
                 status: StatusCodes.BAD_REQUEST
             }))
-        } else if (amount < user.balance  || amount == user.balance) {
+        } else if (amount < user.balance || amount == user.balance) {
 
             const checkpin = await user.comparePin(pin)
 
@@ -40,7 +40,7 @@ const makeTransaction = async (req, res) => {
                 throw new Error('This user dosent have an account with Mavin')
             }
 
-            const receiverIncrease = checkReciever.balance +  Number(amount);
+            const receiverIncrease = checkReciever.balance + Number(amount);
             const senderIncrease = user.balance - Number(amount)
 
             checkReciever.balance = receiverIncrease
@@ -48,6 +48,8 @@ const makeTransaction = async (req, res) => {
 
             await checkReciever.save();
             await user.save();
+
+
 
             let ref = crypto.randomBytes(16).toString('hex')
 
@@ -88,6 +90,45 @@ const makeTransaction = async (req, res) => {
 }
 
 
+const getUserSingleTransactions = async (req, res) => {
+
+    const { number } = req.body
+
+    if (!number) {
+        throw new Error('please provide user number')
+    }
+
+    const users = await User.findOne({ phoneNumber: number })
+
+    if (!users) {
+        throw new Error('No user with this number')
+    }
+
+    const user = await Transact.find({ number })
+
+    const transaction = user.map(transact => {
+
+        const status = (users.phoneNumber === transact.sender) ? "sent" : "recieved"
+
+        return {
+            sender: transact.sender,
+            receiver: transact.receiver,
+            amount: transact.amount,
+            ref: transact.referenceId,
+            date: transact.date,
+            status
+        }
+    })
+
+    res.status(StatusCodes.OK).json(response({
+        data: transaction,
+        status: StatusCodes.OK
+    }))
+
+}
+
+
 module.exports = {
-    makeTransaction
+    makeTransaction,
+    getUserSingleTransactions
 }
