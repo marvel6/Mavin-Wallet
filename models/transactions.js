@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const product = require('../../My Folders/PRO/E-Commerce-API/models/product')
 
 
 const Transactions = new mongoose.Schema({
@@ -26,6 +27,10 @@ const Transactions = new mongoose.Schema({
 
     }
 })
+
+
+
+
 
 
 module.exports = mongoose.model('Transaction', Transactions)

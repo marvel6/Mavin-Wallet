@@ -4,6 +4,8 @@ const { StatusCodes } = require('http-status-codes')
 const { response } = require('../responses/response')
 const crypto = require('crypto')
 const { currentTime } = require('../utils/Jutils')
+const CodePin = require('../models/getTransaction')
+const { generateCodeUnique } = require('../utils/RandomCodes/codes')
 
 const makeTransaction = async (req, res) => {
 
@@ -123,6 +125,41 @@ const getUserSingleTransactions = async (req, res) => {
     res.status(StatusCodes.OK).json(response({
         data: transaction,
         status: StatusCodes.OK
+    
+    }))
+
+}
+
+
+
+const getTransactionCode = async (req, res) => {
+    const { amount } = req.body
+
+    if (!amount) {
+        throw new Error('There is no amount for this transactions')
+    }
+
+    const user = await User.findOne({ _id: req.user.userId })
+
+    if (!user) {
+        throw new Error('This user is not registered')
+    }
+   
+    const arrs = generateCodeUnique()
+   
+    const newUser = {
+        name: user.username,
+        amount,
+        code: arrs,
+        user:req.user.userId
+
+    }
+
+     const generatedCode = await CodePin.create(newUser)
+
+    res.status(StatusCodes.OK).json(response({
+      data:generatedCode,
+      status:StatusCodes.OK
     }))
 
 }
@@ -130,5 +167,6 @@ const getUserSingleTransactions = async (req, res) => {
 
 module.exports = {
     makeTransaction,
+    getTransactionCode,
     getUserSingleTransactions
 }

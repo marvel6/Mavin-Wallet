@@ -16,11 +16,7 @@ const authenticateUser = async (req, res, next) => {
 
             if (!payload) {
 
-                res.status(StatusCodes.UNAUTHORIZED).json(response({
-                    data: 'You are not authorized to access this route',
-                    status: StatusCodes.UNAUTHORIZED
-                }))
-
+                throw new Error('You are not authorized to access this route')
             }
             req.user = payload.user;
             return next();
@@ -33,11 +29,7 @@ const authenticateUser = async (req, res, next) => {
         });
 
         if (!existingToken || !existingToken?.isValid) {
-            res.status(StatusCodes.UNAUTHORIZED).json(response({
-                data: 'You are not authorized to acess this route',
-                status: StatusCodes.UNAUTHORIZED
-            }))
-
+            throw new Error('You are not authorized to acess this route')
         }
 
         attachCookiesToResponse({
@@ -50,7 +42,7 @@ const authenticateUser = async (req, res, next) => {
         next();
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: 'INTERNAL_SERVER_ERROR',
+            data: 'Something happened while verification',
             status: StatusCodes.BAD_REQUEST
         }))
     }
