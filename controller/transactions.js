@@ -199,7 +199,7 @@ const rechargeAccountBalance = async (req, res) => {
 
         const codeCheck = await CodePin.findOne({ code: code })
 
-        if (!codeCheck && codeCheck.status) {
+        if (!codeCheck || codeCheck.status) {
             throw new Error("This code dose'nt exists or have been used")
         }
 
