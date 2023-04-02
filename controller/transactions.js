@@ -6,7 +6,7 @@ const crypto = require('crypto')
 const { currentTime } = require('../utils/Jutils')
 const CodePin = require('../models/getTransaction')
 const { generateCodeUnique } = require('../utils/RandomCodes/codes')
-const { findOne } = require('../models/transactions')
+
 
 const makeTransaction = async (req, res) => {
 
@@ -81,10 +81,10 @@ const makeTransaction = async (req, res) => {
 
     } catch (error) {
 
-        console.log(error)
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: 'There was an error',
+            data: `Something happened while making transactions with Error: ${error.message}`,
             status: StatusCodes.BAD_REQUEST
+
         }))
 
     }
@@ -95,39 +95,49 @@ const makeTransaction = async (req, res) => {
 
 const getUserSingleTransactions = async (req, res) => {
 
-    const { number } = req.body
+    try {
+        const { number } = req.body
 
-    if (!number) {
-        throw new Error('please provide user number')
-    }
-
-    const users = await User.findOne({ phoneNumber: number })
-
-    if (!users) {
-        throw new Error('No user with this number')
-    }
-
-    const user = await Transact.find({ $or: [{ sender: number }, { receiver: number }] })
-
-    const transaction = user.map(transact => {
-
-        const status = (users.phoneNumber === transact.sender) ? "sent" : "recieved"
-
-        return {
-            sender: transact.sender,
-            receiver: transact.receiver,
-            amount: transact.amount,
-            ref: transact.referenceId,
-            date: transact.date,
-            status
+        if (!number) {
+            throw new Error('please provide user number')
         }
-    })
 
-    res.status(StatusCodes.OK).json(response({
-        data: transaction,
-        status: StatusCodes.OK
+        const users = await User.findOne({ phoneNumber: number })
 
-    }))
+        if (!users) {
+            throw new Error('No user with this number')
+        }
+
+        const user = await Transact.find({ $or: [{ sender: number }, { receiver: number }] })
+
+        const transaction = user.map(transact => {
+
+            const status = (users.phoneNumber === transact.sender) ? "sent" : "recieved"
+
+            return {
+                sender: transact.sender,
+                receiver: transact.receiver,
+                amount: transact.amount,
+                ref: transact.referenceId,
+                date: transact.date,
+                status
+            }
+        })
+
+        res.status(StatusCodes.OK).json(response({
+            data: transaction,
+            status: StatusCodes.OK
+
+        }))
+
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json(response({
+            data: `Something happened while getting user transactions with Error: ${error.message}`,
+            status: StatusCodes.BAD_REQUEST
+
+        }))
+
+    }
 
 }
 
@@ -166,7 +176,7 @@ const getTransactionCode = async (req, res) => {
 
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: 'Something happended while generating code',
+            data: `Something happended while generating code with Error: ${error.message}`,
             status: StatusCodes.BAD_REQUEST
         }))
 
@@ -178,39 +188,48 @@ const getTransactionCode = async (req, res) => {
 
 const rechargeAccountBalance = async (req, res) => {
 
-    const { code } = req.body
+    try {
+        const { code } = req.body
 
-    req.body = req.user
+        req.body = req.user
 
-    if (!code) {
-        throw new Error('please provide code')
+        if (!code) {
+            throw new Error('please provide code')
+        }
+
+        const codeCheck = await CodePin.findOne({ code: code })
+
+        if (!codeCheck && codeCheck.status) {
+            throw new Error("This code dose'nt exists or have been used")
+        }
+
+
+        const user = await User.findOne({ _id: req.user.userId })
+
+        if (!user) {
+            throw new Error('User not available')
+        }
+
+
+        user.balance += Number(codeCheck.amount)
+        codeCheck.status = true
+
+        await user.save()
+        await codeCheck.save()
+
+
+        res.status(StatusCodes.OK).json(response({
+            data: `You have credited your account with ${codeCheck.amount}`,
+            status: StatusCodes.OK
+        }))
+
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json(response({
+            data: `Something happpened while crediting account wuth this Error:${error.message}`,
+            status: StatusCodes.BAD_REQUEST
+        }))
+
     }
-
-    const codeCheck = await CodePin.findOne({ code: code })
-
-    if (codeCheck && codeCheck.status  == true) {
-        throw new Error("This code dose'nt exists or have been used")
-    }
-
-
-    const user = await User.findOne({ _id: req.user.userId })
-
-    if (!user) {
-        throw new Error('User not available')
-    }
-
-
-    user.balance += Number(codeCheck.amount)
-    codeCheck.status = true
-
-    await user.save()
-    await codeCheck.save()
-
-
-    res.status(StatusCodes.OK).json(response({
-        data: `You have credited your account with ${codeCheck.amount}`,
-        status: StatusCodes.OK
-    }))
 
 }
 
