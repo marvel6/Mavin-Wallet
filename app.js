@@ -10,6 +10,9 @@ const cookieParser = require('cookie-parser')
 const helmet = require('helmet')
 const cors = require('cors')
 const morgan = require('morgan')
+const mongosantize = require('mongo-sanitize')
+const xss = require('xss-clean')
+const rateLimiter = require('express-rate-limit')
 
 
 
@@ -19,11 +22,19 @@ const userSettingRoute = require('./routers/user-setting')
 const makeTransactionRoute = require('./routers/transactions')
 
 app.use(express.json())
-app.use(express.urlencoded({extended:true}))
+app.use(express.urlencoded({ extended: true }))
 
 
 app.use(cookieParser(process.env.JWT_SECRET))
 
+
+
+app.set('trust proxy', 1)
+
+app.use(rateLimiter({
+    windowMs: 1000 * 60 * 15,
+    max: 60
+}))
 
 
 app.use(cors({
@@ -32,13 +43,16 @@ app.use(cors({
     methods: ['GET', 'POST', 'DELETE', 'PATCH']
 }))
 
+
 app.use(morgan('dev'))
 app.use(helmet())
+app.use(mongosantize())
+app.use(xss())
 
 
-app.use('/api/v1',userRoute)
-app.use('/api/v1',userSettingRoute)
-app.use('/api/v1/user',makeTransactionRoute)
+app.use('/api/v1', userRoute)
+app.use('/api/v1', userSettingRoute)
+app.use('/api/v1/user', makeTransactionRoute)
 
 const start = async () => {
     try {
