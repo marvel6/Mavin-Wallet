@@ -6,6 +6,7 @@ const crypto = require('crypto')
 const { currentTime } = require('../utils/Jutils')
 const CodePin = require('../models/getTransaction')
 const { generateCodeUnique } = require('../utils/RandomCodes/codes')
+const { findOne } = require('../models/transactions')
 
 const makeTransaction = async (req, res) => {
 
@@ -125,7 +126,7 @@ const getUserSingleTransactions = async (req, res) => {
     res.status(StatusCodes.OK).json(response({
         data: transaction,
         status: StatusCodes.OK
-    
+
     }))
 
 }
@@ -135,31 +136,80 @@ const getUserSingleTransactions = async (req, res) => {
 const getTransactionCode = async (req, res) => {
     const { amount } = req.body
 
-    if (!amount) {
-        throw new Error('There is no amount for this transactions')
+    try {
+        if (!amount) {
+            throw new Error('There is no amount for this transactions')
+        }
+
+        const user = await User.findOne({ _id: req.user.userId })
+
+        if (!user) {
+            throw new Error('This user is not registered')
+        }
+
+        const arrs = generateCodeUnique()
+
+        const newUser = {
+            name: user.username,
+            amount,
+            code: arrs,
+            user: req.user.userId
+
+        }
+
+        const generatedCode = await CodePin.create(newUser)
+
+        res.status(StatusCodes.OK).json(response({
+            data: newUser,
+            status: StatusCodes.OK
+        }))
+
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json(response({
+            data: 'Something happended while generating code',
+            status: StatusCodes.BAD_REQUEST
+        }))
+
     }
+
+}
+
+
+
+const rechargeAccountBalance = async (req, res) => {
+
+    const { code } = req.body
+
+    req.body = req.user
+
+    if (!code) {
+        throw new Error('please provide code')
+    }
+
+    const codeCheck = await CodePin.findOne({ code: code })
+
+    if (codeCheck && codeCheck.status  == true) {
+        throw new Error("This code dose'nt exists or have been used")
+    }
+
 
     const user = await User.findOne({ _id: req.user.userId })
 
     if (!user) {
-        throw new Error('This user is not registered')
-    }
-   
-    const arrs = generateCodeUnique()
-   
-    const newUser = {
-        name: user.username,
-        amount,
-        code: arrs,
-        user:req.user.userId
-
+        throw new Error('User not available')
     }
 
-     const generatedCode = await CodePin.create(newUser)
+
+    user.balance += Number(codeCheck.amount)
+    codeCheck.status = true
+
+    await user.save()
+    await codeCheck.save()
+
 
     res.status(StatusCodes.OK).json(response({
-      data:generatedCode,
-      status:StatusCodes.OK
+        data: `You have credited your account with ${codeCheck.amount}`,
+        status: StatusCodes.OK
     }))
 
 }
@@ -168,5 +218,6 @@ const getTransactionCode = async (req, res) => {
 module.exports = {
     makeTransaction,
     getTransactionCode,
-    getUserSingleTransactions
+    getUserSingleTransactions,
+    rechargeAccountBalance
 }
