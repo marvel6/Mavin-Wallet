@@ -24,11 +24,9 @@ const makeTransaction = async (req, res) => {
         }
 
         if (amount > user.balance) {
+            
+            throw new Error('Insufficient balance account')
 
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: 'Insufficient balance account',
-                status: StatusCodes.BAD_REQUEST
-            }))
         } else if (amount < user.balance || amount == user.balance) {
 
             const checkpin = await user.comparePin(pin)
