@@ -255,7 +255,7 @@ const logout = async (req, res) => {
     } catch (error) {
 
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: ' something happened logging out',
+            data: `something happened logging out ${error.message}`,
             status: StatusCodes.BAD_REQUEST
 
         }))
