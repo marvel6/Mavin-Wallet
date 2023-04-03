@@ -42,7 +42,7 @@ const authenticateUser = async (req, res, next) => {
         next();
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: 'Something happened while verification',
+            data: `Something happened while verification ${error.message}`,
             status: StatusCodes.BAD_REQUEST
         }))
     }
