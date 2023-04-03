@@ -52,15 +52,18 @@ app.use('/api/v1', userRoute)
 app.use('/api/v1', userSettingRoute)
 app.use('/api/v1/user', makeTransactionRoute)
 
+
 const start = async () => {
     try {
 
-        await connecdb('mongodb://0.0.0.0:27017/Mavin')
+        await connecdb(process.env.MONGO_URI)
 
     } catch (error) {
         console.log(error.message)
     }
 }
+
+// 'mongodb://0.0.0.0:27017/Mavin'
 
 
 start().then(() => {
