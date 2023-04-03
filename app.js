@@ -12,7 +12,7 @@ const cors = require('cors')
 const morgan = require('morgan')
 const rateLimiter = require('express-rate-limit')
 const mongoSanitize = require('express-mongo-sanitize')
-const xss = require('xss-clean')
+
  
 
 const connecdb = require('./db/connect')
@@ -42,7 +42,7 @@ app.use(cors({
     methods: ['GET', 'POST', 'DELETE', 'PATCH']
 }))
 
-app.use(xss())
+
 app.use(morgan('dev'))
 app.use(helmet())
 app.use(mongoSanitize())

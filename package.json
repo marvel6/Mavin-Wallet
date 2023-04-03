@@ -26,8 +26,7 @@
     "moment": "^2.29.4",
     "mongoose": "^7.0.3",
     "morgan": "^1.10.0",
-    "validator": "^13.9.0",
-    "xss-clean": "^0.1.1"
+    "validator": "^13.9.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
