@@ -13,6 +13,10 @@ const morgan = require('morgan')
 const rateLimiter = require('express-rate-limit')
 const mongoSanitize = require('express-mongo-sanitize')
 
+const SwaggerUI = require('swagger-ui-express')
+const YAML = require('yamljs')
+const YamlDoc = YAML.load('./swagger.yaml')
+
 
 
 const connectDB = require('./db/connect')
@@ -42,7 +46,7 @@ app.use(cors({
     methods: ['GET', 'POST', 'DELETE', 'PATCH']
 }))
 
-if(process.env.NODE_ENV === 'development'){
+if (process.env.NODE_ENV === 'development') {
 
     app.use(morgan('dev'))
 
@@ -50,6 +54,26 @@ if(process.env.NODE_ENV === 'development'){
 
 app.use(helmet())
 app.use(mongoSanitize())
+
+app.use('/api-docs', SwaggerUI.serve, SwaggerUI.setup(YamlDoc))
+
+app.get('/', (req, res) => {
+
+    let link =`<div style="display:flex; justify-content: center; align-items: center; width: 100%; heigth: 100vh;">
+        <div style="border-radius: 5px; box-shadow: 2px 2px 5px #999; background-color: #FFF; padding: 20px; 
+            margin-top:40px; min-width:500px; font-size:36px; display:flex; justify-content:center; align-items:center; flex-direction:column; >
+            <h1 style="color: #5F9EA0; text-shadow: 1px 1px 1px #999; text-align: center;">Mavin Wallet</h1>
+            <div style="margin: 20px 10px">
+                <a href="/api-docs" 
+                style="display: block; padding: 10px; background-color: #D8BFD8; 
+                color: #FFF; text-decoration: none; box-shadow: 2px 2px 5px #999;">LINK TO API DOCS</a>
+            </div>
+        </div>
+    </div>`
+
+    res.send(link)
+})
+
 
 
 app.use('/api/v1', userRoute)

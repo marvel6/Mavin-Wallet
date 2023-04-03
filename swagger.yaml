@@ -1,0 +1,437 @@
+openapi: 3.0.0
+info:
+  title: Mavin Wallet
+  contact: {}
+  version: '1.0'
+servers:
+- url: https://mavin-wallet.cyclic.app/api/v1
+  variables: {}
+paths:
+  /register:
+    post:
+      tags:
+      - Authentication
+      summary: Register
+      operationId: Register
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/RegisterRequest'
+              - example:
+                  email: Marvelloussolomon49@gmail.com
+                  phoneNumber: '09072336259'
+                  password: '08036191567'
+                  username: Marvel6
+                  transactionPin: '1111'
+            example:
+              email: Marvelloussolomon49@gmail.com
+              phoneNumber: '09072336259'
+              password: '08036191567'
+              username: Marvel6
+              transactionPin: '1111'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security: []
+  /user/verify-email:
+    post:
+      tags:
+      - Authentication
+      summary: verify-email
+      operationId: verify-email
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/verify-email-request'
+              - example:
+                  email: Marvelloussolomon49@gmail.com
+                  verificationToken: ea41c2c3400e207ec572679dff3e6a8ebbfb62c3d93f28649e51a747fdb9736e8c2f66
+            example:
+              email: Marvelloussolomon49@gmail.com
+              verificationToken: ea41c2c3400e207ec572679dff3e6a8ebbfb62c3d93f28649e51a747fdb9736e8c2f66
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security: []
+  /login:
+    post:
+      tags:
+      - Authentication
+      summary: Login
+      operationId: Login
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/LoginRequest'
+              - example:
+                  email: Marvelloussolomon49@gmail.com
+                  password: '08036191567'
+            example:
+              email: Marvelloussolomon49@gmail.com
+              password: '08036191567'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security: []
+  /logout:
+    delete:
+      tags:
+      - Authentication
+      summary: logout
+      operationId: logout
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /all:
+    get:
+      tags:
+      - User Settings
+      summary: get all users
+      operationId: getallusers
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: The user ID
+    get:
+      tags:
+      - User Settings
+      summary: get single user
+      operationId: getsingleuser
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /updateuser:
+    post:
+      tags:
+      - User Settings
+      summary: update user info
+      operationId: updateuserinfo
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/updateuserinforequest'
+              - example:
+                  email: Marvelloussolomon4@gmail.com
+                  username: Marvel6
+            example:
+              email: Marvelloussolomon4@gmail.com
+              username: Marvel6
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /updatepassword:
+    patch:
+      tags:
+      - User Settings
+      summary: update user password
+      operationId: updateuserpassword
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/updateuserpasswordrequest'
+              - example:
+                  oldPassword: '123456789'
+                  newPassword: '09072336259'
+            example:
+              oldPassword: '123456789'
+              newPassword: '09072336259'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /deleteWallet/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: The user ID
+    delete:
+      tags:
+      - User Settings
+      summary: Delete wallet Account
+      operationId: DeletewalletAccount
+      parameters:
+      - name: id
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /user/transfers:
+    post:
+      tags:
+      - Make Transactions
+      summary: Transfer
+      operationId: Transfer
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/TransferRequest'
+              - example:
+                  receiver: '08036191567'
+                  amount: '2000'
+                  pin: '1111'
+            example:
+              receiver: '08036191567'
+              amount: '2000'
+              pin: '1111'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /user/Transactions:
+    get:
+      tags:
+      - Make Transactions
+      summary: All Single Transactions
+      operationId: AllSingleTransactions
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /user/generateCode:
+    post:
+      tags:
+      - Make Transactions
+      summary: Get Code
+      operationId: GetCode
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/GetCodeRequest'
+              - example:
+                  amount: ' 2000'
+            example:
+              amount: ' 2000'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /user/rechargeAccount:
+    post:
+      tags:
+      - Make Transactions
+      summary: Recharge Account
+      operationId: RechargeAccount
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/RechargeAccountRequest'
+              - example:
+                  code: ''
+            example:
+              code: ''
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+components:
+  schemas:
+    RegisterRequest:
+      title: RegisterRequest
+      required:
+      - email
+      - phoneNumber
+      - password
+      - username
+      - transactionPin
+      type: object
+      properties:
+        email:
+          type: string
+        phoneNumber:
+          type: string
+        password:
+          type: string
+        username:
+          type: string
+        transactionPin:
+          type: string
+      example:
+        email: Marvelloussolomon49@gmail.com
+        phoneNumber: '09072336259'
+        password: '08036191567'
+        username: Marvel6
+        transactionPin: '1111'
+    verify-email-request:
+      title: verify-email-request
+      required:
+      - email
+      - verificationToken
+      type: object
+      properties:
+        email:
+          type: string
+        verificationToken:
+          type: string
+      example:
+        email: Marvelloussolomon49@gmail.com
+        verificationToken: ea41c2c3400e207ec572679dff3e6a8ebbfb62c3d93f28649e51a747fdb9736e8c2f66
+    LoginRequest:
+      title: LoginRequest
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      example:
+        email: Marvelloussolomon49@gmail.com
+        password: '08036191567'
+    updateuserinforequest:
+      title: updateuserinforequest
+      required:
+      - email
+      - username
+      type: object
+      properties:
+        email:
+          type: string
+        username:
+          type: string
+      example:
+        email: Marvelloussolomon4@gmail.com
+        username: Marvel6
+    updateuserpasswordrequest:
+      title: updateuserpasswordrequest
+      required:
+      - oldPassword
+      - newPassword
+      type: object
+      properties:
+        oldPassword:
+          type: string
+        newPassword:
+          type: string
+      example:
+        oldPassword: '123456789'
+        newPassword: '09072336259'
+    TransferRequest:
+      title: TransferRequest
+      required:
+      - receiver
+      - amount
+      - pin
+      type: object
+      properties:
+        receiver:
+          type: string
+        amount:
+          type: string
+        pin:
+          type: string
+      example:
+        receiver: '08036191567'
+        amount: '2000'
+        pin: '1111'
+    GetCodeRequest:
+      title: GetCodeRequest
+      required:
+      - amount
+      type: object
+      properties:
+        amount:
+          type: string
+      example:
+        amount: ' 2000'
+    RechargeAccountRequest:
+      title: RechargeAccountRequest
+      required:
+      - code
+      type: object
+      properties:
+        code:
+          type: string
+      example:
+        code: ''
+  securitySchemes:
+    httpBearer:
+      type: http
+      scheme: bearer
+security:
+- httpBearer: []
+tags:
+- name: Authentication
+- name: User Settings
+- name: Make Transactions
