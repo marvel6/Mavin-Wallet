@@ -10,11 +10,10 @@ const cookieParser = require('cookie-parser')
 const helmet = require('helmet')
 const cors = require('cors')
 const morgan = require('morgan')
-const mongosantize = require('mongo-sanitize')
-const xss = require('xss-clean')
 const rateLimiter = require('express-rate-limit')
-
-
+const mongoSanitize = require('express-mongo-sanitize')
+const xss = require('xss-clean')
+ 
 
 const connecdb = require('./db/connect')
 const userRoute = require('./routers/userRoute')
@@ -43,11 +42,10 @@ app.use(cors({
     methods: ['GET', 'POST', 'DELETE', 'PATCH']
 }))
 
-
+app.use(xss())
 app.use(morgan('dev'))
 app.use(helmet())
-app.use(mongosantize())
-app.use(xss())
+app.use(mongoSanitize())
 
 
 app.use('/api/v1', userRoute)

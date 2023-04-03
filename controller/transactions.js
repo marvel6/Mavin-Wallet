@@ -225,7 +225,7 @@ const rechargeAccountBalance = async (req, res) => {
 
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `Something happpened while crediting account wuth this Error:${error.message}`,
+            data: `Something happpened while crediting account with this Error:${error.message}`,
             status: StatusCodes.BAD_REQUEST
         }))
 
