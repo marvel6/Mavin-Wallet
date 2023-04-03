@@ -60,7 +60,7 @@ const Register = async (req, res) => {
 
         console.log(error)
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: 'An error occurred while registering the user',
+            data: `An error occurred while registering the user ${error.message} `,
             status: StatusCodes.BAD_REQUEST
         }))
 
@@ -75,29 +75,17 @@ const verifyEmail = async (req, res) => {
 
         if (!email || !verificationToken) {
 
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: 'Please provide valid crendentials',
-                status: StatusCodes.BAD_REQUEST
-            }))
-
+            throw new Error('Please provide valid crendentials')
         }
 
         const user = await User.findOne({ email })
 
         if (!user) {
-
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: 'user not found',
-                status: StatusCodes.BAD_REQUEST
-            }))
+            throw new Error('user not found')
         }
 
         if (verificationToken != user.validationString) {
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: 'User not validated',
-                status: StatusCodes.BAD_REQUEST
-            }))
-
+            throw new Error('User not validated')
         }
 
 
@@ -243,12 +231,12 @@ const logout = async (req, res) => {
         await tokenModel.findOneAndDelete({ user: req.user.userId });
 
         res.cookie('accessToken', 'logout', {
-          httpOnly: true,
-          expires: new Date(Date.now()),
+            httpOnly: true,
+            expires: new Date(Date.now()),
         });
         res.cookie('refreshToken', 'logout', {
-          httpOnly: true,
-          expires: new Date(Date.now()),
+            httpOnly: true,
+            expires: new Date(Date.now()),
         });
         res.status(StatusCodes.OK).json({ msg: 'user logged out!' });
 
