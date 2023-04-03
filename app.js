@@ -13,9 +13,9 @@ const morgan = require('morgan')
 const rateLimiter = require('express-rate-limit')
 const mongoSanitize = require('express-mongo-sanitize')
 
- 
 
-const connecdb = require('./db/connect')
+
+const connectDB = require('./db/connect')
 const userRoute = require('./routers/userRoute')
 const userSettingRoute = require('./routers/user-setting')
 const makeTransactionRoute = require('./routers/transactions')
@@ -42,8 +42,12 @@ app.use(cors({
     methods: ['GET', 'POST', 'DELETE', 'PATCH']
 }))
 
+if(process.env.NODE_ENV === 'development'){
 
-app.use(morgan('dev'))
+    app.use(morgan('dev'))
+
+}
+
 app.use(helmet())
 app.use(mongoSanitize())
 
@@ -56,7 +60,7 @@ app.use('/api/v1/user', makeTransactionRoute)
 const start = async () => {
     try {
 
-        await connecdb(process.env.MONGO_URI)
+        await connectDB(process.env.MONGO_URI)
 
     } catch (error) {
         console.log(error.message)
