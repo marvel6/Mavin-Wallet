@@ -1,5 +1,5 @@
 const express = require('express')
-const router = express()
+const router = express.Router()
 
 const { makeTransaction, getUserSingleTransactions, getTransactionCode, rechargeAccountBalance } = require('../controller/transactions')
 const { authenticateUser, checkPermision } = require('../middleware/authorization')
