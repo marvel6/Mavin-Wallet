@@ -163,9 +163,9 @@ const login = async (req, res) => {
 
                 checkToken.userAgent = req.headers['user-agent'];
 
-                await checkToken.save()
+                deviceChangedEmail({ name: req.user.name, email: user.email });
 
-                deviceChangedEmail({ name: req.user.name, email: user.email })
+                await checkToken.save()
 
                 await tokenModel.findOneAndDelete({ user: user._id })
 
