@@ -60,7 +60,7 @@ const Register = async (req, res) => {
 
         console.log(error)
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `An error occurred while registering the user ${error.message} `,
+            data: `BAD_REQUEST ${error.message} `,
             status: StatusCodes.BAD_REQUEST
         }))
 
@@ -102,9 +102,8 @@ const verifyEmail = async (req, res) => {
 
     } catch (error) {
 
-        console.log(error.message)
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: 'An error occurred while verifying user Email',
+            data: `BAD_REQUEST ${error.message}`,
             status: StatusCodes.BAD_REQUEST
         }))
 
@@ -216,7 +215,7 @@ const login = async (req, res) => {
     } catch (error) {
 
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `Something happened while logging user`,
+            data: `BAD_REQUEST ${error.message}`,
             status: StatusCodes.BAD_REQUEST
         }))
 
@@ -244,7 +243,7 @@ const logout = async (req, res) => {
     } catch (error) {
 
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `something happened logging out ${error.message}`,
+            data: ` BAD_REQUEST ${error.message}`,
             status: StatusCodes.BAD_REQUEST
 
         }))

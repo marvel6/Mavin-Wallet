@@ -80,7 +80,7 @@ const makeTransaction = async (req, res) => {
     } catch (error) {
 
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `Something happened while making transactions with Error: ${error.message}`,
+            data: `BAD_REQUEST with Error: ${error.message}`,
             status: StatusCodes.BAD_REQUEST
 
         }))
@@ -130,7 +130,7 @@ const getUserSingleTransactions = async (req, res) => {
 
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `Something happened while getting user transactions with Error: ${error.message}`,
+            data: `BAD_REQUEST with Error: ${error.message}`,
             status: StatusCodes.BAD_REQUEST
 
         }))
@@ -174,7 +174,7 @@ const getTransactionCode = async (req, res) => {
 
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `Something happended while generating code with Error: ${error.message}`,
+            data: `BAD_REQUEST with Error: ${error.message}`,
             status: StatusCodes.BAD_REQUEST
         }))
 
@@ -223,7 +223,7 @@ const rechargeAccountBalance = async (req, res) => {
 
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `Something happpened while crediting account with this Error:${error.message}`,
+            data: `BAD_REQUEST with this Error:${error.message}`,
             status: StatusCodes.BAD_REQUEST
         }))
 
@@ -261,7 +261,7 @@ const rechargeMyAccount = async (req, res) => {
 
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `There was a problem while crediting your account with Error:${error.message}`,
+            data: `BAD_REQUEST with Error:${error.message}`,
             status: StatusCodes.BAD_REQUEST
         }))
 

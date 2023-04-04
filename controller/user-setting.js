@@ -23,10 +23,7 @@ const getSingleUserWallet = async (req, res) => {
         const users = await User.findOne({ userId }).select('-password -validationString ')
 
         if (!users) {
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: `There is no user with id ${users._id}`,
-                status: StatusCodes.BAD_REQUEST
-            }))
+            throw new Error('No user found')
         }
 
         checkPermission(req.user, users._id)
@@ -38,9 +35,8 @@ const getSingleUserWallet = async (req, res) => {
 
     } catch (error) {
 
-        console.log(error)
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `Something happend when getSingleUserWallet`,
+            data: `BAD_REQUEST ${error.message}`,
             status: StatusCodes.BAD_REQUEST
         }))
 
@@ -56,21 +52,13 @@ const updateUserWalletInfo = async (req, res) => {
         const { email, username } = req.body
 
         if (!email || !username) {
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: `Please provide email and password`,
-                status: StatusCodes.BAD_REQUEST
-            }))
-
+            throw new Error('Please provide email and password')
         }
 
         const checkuser = await User.findOne({ _id: req.user.userId })
 
         if (!checkuser) {
-
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: `User not available`,
-                status: StatusCodes.BAD_REQUEST
-            }))
+            throw new Error('User not found')
         }
 
         checkuser.username = username
@@ -89,7 +77,7 @@ const updateUserWalletInfo = async (req, res) => {
 
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `Something happend when updating user`,
+            data: `BAD_REQUEST ${error.message}`,
             status: StatusCodes.BAD_REQUEST
         }))
 
@@ -99,51 +87,39 @@ const updateUserWalletInfo = async (req, res) => {
 
 const updateUserWalletPassword = async (req, res) => {
 
-    try{
+    try {
         const { oldPassword, newPassword } = req.body
 
-    if (!oldPassword || !newPassword) {
+        if (!oldPassword || !newPassword) {
+            throw new Error('Password mismatch')
+        }
 
-        res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `Password mismatch`,
-            status: StatusCodes.BAD_REQUEST
+
+        const user = await User.findOne({ user: req.user.userId })
+
+        if (!user) {
+            throw new Error('user not found')
+        }
+
+        const checkPasswordValid = await user.comparePassword(oldPassword)
+
+
+        if (!checkPasswordValid) {
+            throw new Error('password Incorrect')
+        }
+
+        user.password = newPassword
+
+        user.save();
+
+        res.status(StatusCodes.OK).json(response({
+            data: `Your password have been updated successfully`,
+            status: StatusCodes.OK
         }))
-    }
 
-
-    const user = await User.findOne({ user: req.user.userId })
-
-    if (!user) {
-
+    } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `There is no user with this account`,
-            status: StatusCodes.BAD_REQUEST
-        }))
-    }
-
-    const checkPasswordValid = await user.comparePassword(oldPassword)
-
-
-    if (!checkPasswordValid) {
-        
-        res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `Password Incorrect`,
-            status: StatusCodes.BAD_REQUEST
-        }))
-    }
-
-    user.password = newPassword
-
-    user.save();
-
-    res.status(StatusCodes.OK).json(response({
-        data: `Your password have been updated successfully`,
-        status: StatusCodes.OK
-    }))
-
-    }catch(error){
-        res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `Something happened while updating user info`,
+            data: `BAD_REQUEST ${error.message}`,
             status: StatusCodes.BAD_REQUEST
         }))
 
@@ -160,10 +136,7 @@ const deleteWalletAccount = async (req, res) => {
         const user = await User.findOne({ userId })
 
         if (!user) {
-            res.status(StatusCodes.BAD_REQUEST).json(response({
-                data: `There is no user with this account`,
-                status: StatusCodes.BAD_REQUEST
-            }))
+            throw new Error('There is no user with this account')
         }
 
         const removeAccount = await User.findOneAndDelete({ userId })
@@ -178,7 +151,7 @@ const deleteWalletAccount = async (req, res) => {
     } catch (error) {
 
         res.status(StatusCodes.BAD_REQUEST).json(response({
-            data: `Something happened while deleting user account`,
+            data: `BAD_REQUEST ${error.message}`,
             status: StatusCodes.BAD_REQUEST
         }))
 
