@@ -208,7 +208,7 @@ const login = async (req, res) => {
 
         await tokenModel.create(newUsers)
 
-        return res.status(StatusCodes.OK).json(response({
+        res.status(StatusCodes.OK).json(response({
             data: `${user.username} has been logged in successfully`,
             status: StatusCodes.OK
         }))
@@ -238,6 +238,7 @@ const logout = async (req, res) => {
             httpOnly: true,
             expires: new Date(Date.now()),
         });
+
         res.status(StatusCodes.OK).json({ msg: 'user logged out!' });
 
     } catch (error) {

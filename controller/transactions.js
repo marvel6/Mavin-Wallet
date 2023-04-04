@@ -24,7 +24,7 @@ const makeTransaction = async (req, res) => {
         }
 
         if (amount > user.balance) {
-            
+
             throw new Error('Insufficient balance account')
 
         } else if (amount < user.balance || amount == user.balance) {
@@ -232,9 +232,48 @@ const rechargeAccountBalance = async (req, res) => {
 }
 
 
+const rechargeMyAccount = async (req, res) => {
+
+
+    const { amount } = req.body
+
+    try {
+
+        if (!amount) {
+            throw new Error('please provide amount value')
+        }
+
+        const user = await User.findOne({ _id: req.user.userId })
+
+        if (!user) {
+            throw new Error('There is no user with this account')
+        }
+
+        user.balance += Number(amount)
+
+        await user.save()
+
+
+        res.status(StatusCodes.OK).json(response({
+            data: `You have credited your acount with ${amount}`,
+            status: StatusCodes.OK
+        }))
+
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json(response({
+            data: `There was a problem while crediting your account with Error:${error.message}`,
+            status: StatusCodes.BAD_REQUEST
+        }))
+
+    }
+
+}
+
+
 module.exports = {
     makeTransaction,
     getTransactionCode,
     getUserSingleTransactions,
-    rechargeAccountBalance
+    rechargeAccountBalance,
+    rechargeMyAccount
 }

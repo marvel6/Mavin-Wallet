@@ -125,7 +125,7 @@ paths:
         schema:
           type: string
         required: true
-        description: The user ID
+        description: Input phoneNumber
     get:
       tags:
       - User Settings
@@ -190,13 +190,6 @@ paths:
           headers: {}
       deprecated: false
   /deleteWallet/{id}:
-    parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-        description: The user ID
     delete:
       tags:
       - User Settings
@@ -210,6 +203,18 @@ paths:
         style: simple
         schema:
           type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /user/Transactions:
+    get:
+      tags:
+      - Make Transactions
+      summary: All Single Transactions
+      operationId: AllSingleTransactions
+      parameters: []
       responses:
         '200':
           description: ''
@@ -238,18 +243,6 @@ paths:
               amount: '2000'
               pin: '1111'
         required: true
-      responses:
-        '200':
-          description: ''
-          headers: {}
-      deprecated: false
-  /user/Transactions:
-    get:
-      tags:
-      - Make Transactions
-      summary: All Single Transactions
-      operationId: AllSingleTransactions
-      parameters: []
       responses:
         '200':
           description: ''
@@ -294,9 +287,33 @@ paths:
               allOf:
               - $ref: '#/components/schemas/RechargeAccountRequest'
               - example:
-                  code: ''
+                  code: '367180'
             example:
-              code: ''
+              code: '367180'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /creditPersonalAccount:
+    post:
+      tags:
+      - Make Transactions
+      summary: Credit Personal Account
+      operationId: CreditPersonalAccount
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/CreditPersonalAccountRequest'
+              - example:
+                  amount: '1000'
+            example:
+              amount: '1000'
         required: true
       responses:
         '200':
@@ -424,7 +441,17 @@ components:
         code:
           type: string
       example:
-        code: ''
+        code: '367180'
+    CreditPersonalAccountRequest:
+      title: CreditPersonalAccountRequest
+      required:
+      - amount
+      type: object
+      properties:
+        amount:
+          type: string
+      example:
+        amount: '1000'
   securitySchemes:
     httpBearer:
       type: http
